@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     // Widgets
     private TextView labelLoanPrincipal;
     private TextView labelMortgageTerm;
-    private TextView labelInterestRate
+    private TextView labelInterestRate;
     private TextView labelMonthlyPayment;
     private TextView labelAddlMonthlyPayment;
     private TextView labelYourResultDescription;
@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputInterestRate;
     private EditText inputMonthlyPayment;
     private EditText inputAddlMonthlyPayment;
+
+    private boolean ignoreEvents;
     
     
     @Override
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     private void initializeUI() {
         findWidgets();
         hookupTextChangedEvents();
+        hookupOnFocusChangedEvents();
     }
 
     private void findWidgets() {
@@ -114,29 +117,47 @@ public class MainActivity extends AppCompatActivity {
         inputInterestRate.addTextChangedListener(new GenericTextWatcher(inputInterestRate));
     }
 
+    private void hookupOnFocusChangedEvents() {
+        View.OnFocusChangeListener l = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(!hasFocus) {
+                    refreshUI();
+                }
+            }
+        };
+        inputLoanPrincipal.setOnFocusChangeListener(l);
+        inputAddlMonthlyPayment.setOnFocusChangeListener(l);
+        inputMonthlyPayment.setOnFocusChangeListener(l);
+        inputMortgageTerm.setOnFocusChangeListener(l);
+        inputInterestRate.setOnFocusChangeListener(l);
+    }
+
     private void initializeMortgageCalc() {
         mortgageCalc = new MortgageCalc(DEFAULT_PRINCIPAL, DEFAULT_TERM, DEFAULT_RATE);
     }
 
     private void refreshUI() {
+        ignoreEvents = true;
         double principal = mortgageCalc.getLoanPrincipal();
-        inputLoanPrincipal.setText(String.format("$%f", principal));
+        inputLoanPrincipal.setText(String.format("$%.2f", principal));
 
         int term = mortgageCalc.getMortgageTermInYears();
         inputMortgageTerm.setText(String.format("%d", term));
 
         double interestRate = mortgageCalc.getInterestRate() * 100;
-        inputInterestRate.setText(String.format("0.00f%%", interestRate));
+        inputInterestRate.setText(String.format("%.4f%%", interestRate));
 
         double baseMonthlyPayment = mortgageCalc.getBaseMonthlyPayment();
-        inputMonthlyPayment.setText(String.format("$%f", baseMonthlyPayment));
+        inputMonthlyPayment.setText(String.format("$%.2f", baseMonthlyPayment));
 
-        double addlMonthlyPayment = mortgageCalc.getBaseMonthlyPayment();
-        inputAddlMonthlyPayment.setText(String.format("$%f", addlMonthlyPayment));
+        double addlMonthlyPayment = mortgageCalc.getAddlMonthlyPayment();
+        inputAddlMonthlyPayment.setText(String.format("$%.2f", addlMonthlyPayment));
 
         Date targetDate = mortgageCalc.getCompletionDate();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("M, yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM, yyyy");
         labelActualTargetMonthResult.setText(dateFormat.format(targetDate));
+        ignoreEvents=false;
     }
 
     /**
@@ -157,24 +178,37 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void afterTextChanged(Editable s) {
-            String text = s.toString();
-            switch(view.getId()) {
-                case R.id.inputAdditionalPayment:
-                    mortgageCalc.setAddlMonthlyPayment(Double.parseDouble(text));
-                    break;
-                case R.id.inputLoanPrincipal:
-                    mortgageCalc.setLoanPrincipal(Double.parseDouble(text));
-                    break;
-                case R.id.inputMonthlyPayment:
-                    mortgageCalc.setBaseMonthlyPayment(Double.parseDouble(text));
-                    break;
-                case R.id.inputMortgageInterestRate:
-                    mortgageCalc.setInterestRate(Double.parseDouble(text) / 100);
-                    break;
-                case R.id.inputMortgageTermInYears:
-                    mortgageCalc.setMortgageTermInYears(Integer.parseInt(text));
-                    break;
+            if(!ignoreEvents) {
+                String text = s.toString();
+                text = sanitizeInputText(text);
+                switch (view.getId()) {
+                    case R.id.inputAdditionalPayment:
+                        mortgageCalc.setAddlMonthlyPayment(Double.parseDouble(text));
+                        break;
+                    case R.id.inputLoanPrincipal:
+                        mortgageCalc.setLoanPrincipal(Double.parseDouble(text));
+                        break;
+                    case R.id.inputMonthlyPayment:
+                        mortgageCalc.setBaseMonthlyPayment(Double.parseDouble(text));
+                        break;
+                    case R.id.inputMortgageInterestRate:
+                        mortgageCalc.setInterestRate(Double.parseDouble(text) / 100);
+                        break;
+                    case R.id.inputMortgageTermInYears:
+                        mortgageCalc.setMortgageTermInYears(Integer.parseInt(text));
+                        break;
+                }
             }
         }
+    }
+
+    private String sanitizeInputText(String s) {
+        String result = s.replace("$", "")
+                .replace("%", "");
+        result = result.trim();
+        if(result.equals("")) {
+            result = "0";
+        }
+        return result;
     }
 }

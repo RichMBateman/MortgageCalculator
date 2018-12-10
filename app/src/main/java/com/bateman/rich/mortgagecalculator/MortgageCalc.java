@@ -67,6 +67,7 @@ public class MortgageCalc {
 
     public void setMortgageTermInYears(int mortgageTermInYears) {
         this.mortgageTermInYears = mortgageTermInYears;
+        deriveBaseMonthlyPayment();
         deriveCompletionInformation();
     }
 
