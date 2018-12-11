@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputLoanPrincipal;
     private EditText inputMortgageTerm;
     private EditText inputInterestRate;
-    private EditText inputMonthlyPayment;
     private EditText inputAddlMonthlyPayment;
 
     private boolean ignoreEvents;
@@ -98,21 +97,21 @@ public class MainActivity extends AppCompatActivity {
         labelLoanPrincipal = findViewById(R.id.labelEnterLoanPrincipal);
         labelMortgageTerm = findViewById(R.id.labelEnterMortgageTerm);
         labelMortgageTerm = findViewById(R.id.labelInterestRate);
-        labelMonthlyPayment = findViewById(R.id.labelMonthlyPayment);
+        labelMonthlyPayment = findViewById(R.id.labelBaseMonthlyPayment);
         labelAddlMonthlyPayment = findViewById(R.id.labelAdditionalMonthlyPayment);
         labelYourResultDescription = findViewById(R.id.labelYourResult);
         labelActualTargetMonthResult = findViewById(R.id.labelResult);
         inputLoanPrincipal = findViewById(R.id.inputLoanPrincipal);
         inputMortgageTerm = findViewById(R.id.inputMortgageTermInYears);
         inputInterestRate = findViewById(R.id.inputMortgageInterestRate);
-        inputMonthlyPayment = findViewById(R.id.inputMonthlyPayment);
+        //inputMonthlyPayment = findViewById(R.id.inputMonthlyPayment);
         inputAddlMonthlyPayment = findViewById(R.id.inputAdditionalPayment);
     }
 
     private void hookupTextChangedEvents() {
         inputLoanPrincipal.addTextChangedListener(new GenericTextWatcher(inputLoanPrincipal));
         inputAddlMonthlyPayment.addTextChangedListener(new GenericTextWatcher(inputAddlMonthlyPayment));
-        inputMonthlyPayment.addTextChangedListener(new GenericTextWatcher(inputMonthlyPayment));
+       // inputMonthlyPayment.addTextChangedListener(new GenericTextWatcher(inputMonthlyPayment));
         inputMortgageTerm.addTextChangedListener(new GenericTextWatcher(inputMortgageTerm));
         inputInterestRate.addTextChangedListener(new GenericTextWatcher(inputInterestRate));
     }
@@ -128,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         };
         inputLoanPrincipal.setOnFocusChangeListener(l);
         inputAddlMonthlyPayment.setOnFocusChangeListener(l);
-        inputMonthlyPayment.setOnFocusChangeListener(l);
+        //inputMonthlyPayment.setOnFocusChangeListener(l);
         inputMortgageTerm.setOnFocusChangeListener(l);
         inputInterestRate.setOnFocusChangeListener(l);
     }
@@ -146,13 +145,13 @@ public class MainActivity extends AppCompatActivity {
         inputMortgageTerm.setText(String.format("%d", term));
 
         double interestRate = mortgageCalc.getInterestRate() * 100;
-        inputInterestRate.setText(String.format("%.4f%%", interestRate));
+        inputInterestRate.setText(String.format("%.4f", interestRate));
 
         double baseMonthlyPayment = mortgageCalc.getBaseMonthlyPayment();
-        inputMonthlyPayment.setText(String.format("$%.2f", baseMonthlyPayment));
+        labelMonthlyPayment.setText(String.format("Base monthly payment: $%.2f", baseMonthlyPayment));
 
         double addlMonthlyPayment = mortgageCalc.getAddlMonthlyPayment();
-        inputAddlMonthlyPayment.setText(String.format("$%.2f", addlMonthlyPayment));
+        inputAddlMonthlyPayment.setText(String.format("%.2f", addlMonthlyPayment));
 
         Date targetDate = mortgageCalc.getCompletionDate();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM, yyyy");
@@ -179,8 +178,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {
             if(!ignoreEvents) {
-                String text = s.toString();
-                text = sanitizeInputText(text);
+                String text = s.toString(); // This text should be correct due to input field settings.
                 switch (view.getId()) {
                     case R.id.inputAdditionalPayment:
                         mortgageCalc.setAddlMonthlyPayment(Double.parseDouble(text));
@@ -188,9 +186,10 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.inputLoanPrincipal:
                         mortgageCalc.setLoanPrincipal(Double.parseDouble(text));
                         break;
-                    case R.id.inputMonthlyPayment:
-                        mortgageCalc.setBaseMonthlyPayment(Double.parseDouble(text));
-                        break;
+                        // 2018.12.11: No longer accepting input for this field.
+//                    case R.id.inputMonthlyPayment:
+//                        mortgageCalc.setBaseMonthlyPayment(Double.parseDouble(text));
+//                        break;
                     case R.id.inputMortgageInterestRate:
                         mortgageCalc.setInterestRate(Double.parseDouble(text) / 100);
                         break;
@@ -198,17 +197,23 @@ public class MainActivity extends AppCompatActivity {
                         mortgageCalc.setMortgageTermInYears(Integer.parseInt(text));
                         break;
                 }
+
+                refreshUI();
             }
         }
     }
 
-    private String sanitizeInputText(String s) {
-        String result = s.replace("$", "")
-                .replace("%", "");
-        result = result.trim();
-        if(result.equals("")) {
-            result = "0";
-        }
-        return result;
-    }
+    // 2018.12.11: I had considered allowing the user to type the "$" or "%" sign (and displaying those symbols in the text)
+    // but it creates a headache when then trying to parse that data.  Plus, without more sophisticated logic, the user might type something like
+    // "35$24" or "4%4" which is DEFINITELY not what I want.  I could imagine the symbols disappearing WHILE the user is editing, but
+    // for my first basic app, that is not what I want to deal with.
+//    private String sanitizeInputText(String s) {
+//        String result = s.replace("$", "")
+//                .replace("%", "");
+//        result = result.trim();
+//        if(result.equals("")) {
+//            result = "0";
+//        }
+//        return result;
+//    }
 }

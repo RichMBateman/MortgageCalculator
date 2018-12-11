@@ -13,11 +13,11 @@ public class MortgageCalc {
     private double loanPrincipal;
     private int mortgageTermInYears;
     private double interestRate;
-    private double baseMonthlyPayment;
+    private double baseMonthlyPayment; // derived field
     private double addlMonthlyPayment;
-    private int numPaymentsRemaining;
+    private int numPaymentsRemaining; // derived field
     private Date currentDate;
-    private Date completionDate; // The date we expect to be done with this loan.
+    private Date completionDate; // derived field.  The date we expect to be done with this loan.
 
     /**
      * Initializes the mortgage calc with some base values.
