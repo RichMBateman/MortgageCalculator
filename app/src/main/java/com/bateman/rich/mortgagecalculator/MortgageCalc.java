@@ -10,6 +10,7 @@ public class MortgageCalc {
     public static final int MONTHS_IN_YEAR=12;
 
     // Private Members
+    private double initLoan;
     private double loanPrincipal;
     private int mortgageTermInYears;
     private double interestRate;
@@ -26,7 +27,8 @@ public class MortgageCalc {
      * @param loanPrincipal The current amount remaining on the loan
      * @param mortgageTermInYears What is the original term of the loan?  15, 30 years?
      */
-    public MortgageCalc(double loanPrincipal, int mortgageTermInYears, double interestRate) {
+    public MortgageCalc(double initLoan, double loanPrincipal, int mortgageTermInYears, double interestRate) {
+        this.initLoan = initLoan;
         this.loanPrincipal = loanPrincipal;
         this.mortgageTermInYears = mortgageTermInYears;
         this.interestRate = interestRate;
@@ -36,6 +38,14 @@ public class MortgageCalc {
         deriveBaseMonthlyPayment();
         deriveNumPaymentsRemaining();
         deriveCompletionDate();
+    }
+
+    public double getInitLoan() {return initLoan;}
+
+    public void setInitLoan(double initLoan) {
+        this.initLoan = initLoan;
+        deriveBaseMonthlyPayment();
+        deriveCompletionInformation();
     }
 
     public double getLoanPrincipal() {
@@ -53,6 +63,7 @@ public class MortgageCalc {
 
     public void setInterestRate(double interestRate) {
         this.interestRate = interestRate;
+        deriveBaseMonthlyPayment();
         deriveCompletionInformation();
     }
 
@@ -75,10 +86,11 @@ public class MortgageCalc {
         return baseMonthlyPayment;
     }
 
-    public void setBaseMonthlyPayment(double baseMonthlyPayment) {
-        this.baseMonthlyPayment = baseMonthlyPayment;
-        deriveCompletionInformation();
-    }
+    // users can no longer set this.
+//    public void setBaseMonthlyPayment(double baseMonthlyPayment) {
+//        this.baseMonthlyPayment = baseMonthlyPayment;
+//        deriveCompletionInformation();
+//    }
 
     public double getAddlMonthlyPayment() {
         return addlMonthlyPayment;
@@ -108,7 +120,7 @@ public class MortgageCalc {
         int totalPayments = mortgageTermInYears * MONTHS_IN_YEAR; // n, the number of payments in the loan
         double operandA = monthlyInterestRate * java.lang.Math.pow(iPlus1, totalPayments);
         double operandB = java.lang.Math.pow(iPlus1, totalPayments) - 1;
-        baseMonthlyPayment = (operandA/operandB) * loanPrincipal;
+        baseMonthlyPayment = (operandA/operandB) * initLoan;
     }
 
     /**
