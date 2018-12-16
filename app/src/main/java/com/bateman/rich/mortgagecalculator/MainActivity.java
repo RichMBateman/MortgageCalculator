@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         initializeUI();
         initializeMortgageCalc();
         refreshUI();

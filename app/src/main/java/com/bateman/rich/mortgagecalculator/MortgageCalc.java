@@ -116,11 +116,15 @@ public class MortgageCalc {
      */
     private void deriveBaseMonthlyPayment() {
         double monthlyInterestRate = getMonthlyInterestRate();
-        double iPlus1 = monthlyInterestRate + 1; // (i+1)
-        int totalPayments = mortgageTermInYears * MONTHS_IN_YEAR; // n, the number of payments in the loan
-        double operandA = monthlyInterestRate * java.lang.Math.pow(iPlus1, totalPayments);
-        double operandB = java.lang.Math.pow(iPlus1, totalPayments) - 1;
-        baseMonthlyPayment = (operandA/operandB) * initLoan;
+        if(monthlyInterestRate == 0) {
+         baseMonthlyPayment = initLoan / (mortgageTermInYears * 12);
+        } else {
+            double iPlus1 = monthlyInterestRate + 1; // (i+1)
+            int totalPayments = mortgageTermInYears * MONTHS_IN_YEAR; // n, the number of payments in the loan
+            double operandA = monthlyInterestRate * java.lang.Math.pow(iPlus1, totalPayments);
+            double operandB = java.lang.Math.pow(iPlus1, totalPayments) - 1;
+            baseMonthlyPayment = (operandA / operandB) * initLoan;
+        }
     }
 
     /**
@@ -128,10 +132,14 @@ public class MortgageCalc {
      */
     private void deriveNumPaymentsRemaining() {
         double monthlyInterestRate = getMonthlyInterestRate();
-        double actualMonthlyPayment = baseMonthlyPayment + addlMonthlyPayment;
-        double operand1 = 1 - (monthlyInterestRate*loanPrincipal) / actualMonthlyPayment;
-        double operand2 = 1 + monthlyInterestRate;
-        numPaymentsRemaining = (int) java.lang.Math.ceil(-1 * java.lang.Math.log(operand1) / java.lang.Math.log(operand2));
+        if(monthlyInterestRate==0) {
+            numPaymentsRemaining =  (int) Math.ceil(loanPrincipal/(baseMonthlyPayment + addlMonthlyPayment));
+        } else {
+            double actualMonthlyPayment = baseMonthlyPayment + addlMonthlyPayment;
+            double operand1 = 1 - (monthlyInterestRate * loanPrincipal) / actualMonthlyPayment;
+            double operand2 = 1 + monthlyInterestRate;
+            numPaymentsRemaining = (int) java.lang.Math.ceil(-1 * java.lang.Math.log(operand1) / java.lang.Math.log(operand2));
+        }
     }
 
     private double getMonthlyInterestRate() {

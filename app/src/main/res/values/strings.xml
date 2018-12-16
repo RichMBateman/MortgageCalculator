@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">Rich\'s Mortgage Calculator</string>
-    <string name="enter_loan_principal">Enter Loan Principal</string>
-    <string name="enter_loan_term">Enter Loan Term (in years) (e.g., 15, 30)</string>
+    <string name="app_name">Mrtg Calc</string>
+    <string name="enter_loan_principal">Enter Current Loan Amount ($):</string>
+    <string name="enter_loan_term">Enter Loan Term (in years) (e.g., 15, 30):</string>
     <string name="base_monthly_payment">Base Monthly Payment (derived)</string>
-    <string name="loan_payoff_info">Your loan will be paid off by:</string>
-    <string name="addl_monthly_payment">Additional Monthly Payment ($)</string>
-    <string name="enter_interest_rate">Enter Interest Rate (%)</string>
+    <string name="loan_payoff_info">Assuming your next payment is next month, your loan will be paid off in:</string>
+    <string name="addl_monthly_payment">Enter Additional Monthly Payment ($):</string>
+    <string name="enter_interest_rate">Enter Interest Rate (%):</string>
     <string name="sample_interest_rate">4.125</string>
     <string name="init_loan_amount">Enter Initial Loan Amount ($):</string>
 </resources>
