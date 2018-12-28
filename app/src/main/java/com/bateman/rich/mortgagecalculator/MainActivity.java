@@ -1,8 +1,5 @@
 package com.bateman.rich.mortgagecalculator;
 
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,6 +11,8 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.bateman.rich.rmblibrary.persistence.SharedAppData;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Mortgage Data
     private MortgageCalc mortgageCalc;
+
+    private final SharedAppData m_sharedAppData = new SharedAppData();
     
     // Widgets
     private TextView labelLoanPrincipal;
@@ -89,12 +90,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void restoreSavedInputData() {
         Log.d(TAG, "restoreSavedInputData: start");
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        mortgageCalc.setInitLoan(getDouble(sharedPreferences, SP_KEY_INITIAL_LOAN, DEFAULT_INIT_LOAN));
-        mortgageCalc.setLoanPrincipal(getDouble(sharedPreferences, SP_KEY_LOAN_PRINCIPAL, DEFAULT_PRINCIPAL));
-        mortgageCalc.setAddlMonthlyPayment(getDouble(sharedPreferences, SP_KEY_ADDL_PAYMENT, 0));
-        mortgageCalc.setInterestRate(getDouble(sharedPreferences, SP_KEY_INTEREST_RATE, DEFAULT_RATE));
-        mortgageCalc.setMortgageTermInYears(sharedPreferences.getInt(SP_KEY_MORTGAGE_TERM, DEFAULT_TERM));
+        m_sharedAppData.load(getApplicationContext());
+        mortgageCalc.setInitLoan(m_sharedAppData.getDouble(SP_KEY_INITIAL_LOAN, DEFAULT_INIT_LOAN));
+        mortgageCalc.setLoanPrincipal(m_sharedAppData.getDouble(SP_KEY_LOAN_PRINCIPAL, DEFAULT_PRINCIPAL));
+        mortgageCalc.setAddlMonthlyPayment(m_sharedAppData.getDouble(SP_KEY_ADDL_PAYMENT, 0));
+        mortgageCalc.setInterestRate(m_sharedAppData.getDouble(SP_KEY_INTEREST_RATE, DEFAULT_RATE));
+        mortgageCalc.setMortgageTermInYears(m_sharedAppData.getInt(SP_KEY_MORTGAGE_TERM, DEFAULT_TERM));
         Log.d(TAG, "restoreSavedInputData: end");
     }
 
@@ -223,18 +224,6 @@ public class MainActivity extends AppCompatActivity {
         ignoreEvents=false;
     }
 
-    // Good use for a library function.
-    // From: https://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-    // This converts to/from a double's "raw long bits" equivalent and stores it as a long.
-    // The two data types have the same size.
-    Editor putDouble(final Editor edit, final String key, final double value) {
-        return edit.putLong(key, Double.doubleToRawLongBits(value));
-    }
-
-    double getDouble(final SharedPreferences prefs, final String key, final double defaultValue) {
-        return Double.longBitsToDouble(prefs.getLong(key, Double.doubleToLongBits(defaultValue)));
-    }
-
     /**
      * From: https://stackoverflow.com/questions/5702771/how-to-use-single-textwatcher-for-multiple-edittexts/6172024#6172024
      * A pattern for responding to text changed to different editors.
@@ -254,27 +243,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {
             if(!ignoreEvents) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                Editor editor = sharedPreferences.edit();
+                m_sharedAppData.load(getApplicationContext());
                 String text = sanitizeInputText(s.toString()); // This text should be correct due to input field settings.
                 switch (view.getId()) {
                     case R.id.inputInitLoanAmount:
                         ignoreRefreshInitLoan=true;
                         Double initLoan = Double.parseDouble(text);
                         mortgageCalc.setInitLoan(initLoan);
-                        putDouble(editor, SP_KEY_INITIAL_LOAN, initLoan);
+                        m_sharedAppData.putDouble(SP_KEY_INITIAL_LOAN, initLoan);
                         break;
                     case R.id.inputAdditionalPayment:
                         ignoreRefreshAddlPayment = true;
                         Double addlPayment = Double.parseDouble(text);
                         mortgageCalc.setAddlMonthlyPayment(addlPayment);
-                        putDouble(editor, SP_KEY_ADDL_PAYMENT, addlPayment);
+                        m_sharedAppData.putDouble(SP_KEY_ADDL_PAYMENT, addlPayment);
                         break;
                     case R.id.inputLoanPrincipal:
                         ignoreRefreshPrincipal=true;
                         Double loanPrincipal = Double.parseDouble(text);
                         mortgageCalc.setLoanPrincipal(loanPrincipal);
-                        putDouble(editor, SP_KEY_LOAN_PRINCIPAL, loanPrincipal);
+                        m_sharedAppData.putDouble(SP_KEY_LOAN_PRINCIPAL, loanPrincipal);
                         break;
                         // 2018.12.11: No longer accepting input for this field.
 //                    case R.id.inputMonthlyPayment:
@@ -284,17 +272,16 @@ public class MainActivity extends AppCompatActivity {
                         ignoreRefreshRate=true;
                         double interestRate = Double.parseDouble(text) / 100.0;
                         mortgageCalc.setInterestRate(interestRate);
-                        putDouble(editor, SP_KEY_INTEREST_RATE, interestRate);
+                        m_sharedAppData.putDouble(SP_KEY_INTEREST_RATE, interestRate);
                         break;
                     case R.id.inputMortgageTermInYears:
                         ignoreRefreshTerm=true;
                         int mortgageTerm = Integer.parseInt(text);
                         mortgageCalc.setMortgageTermInYears(mortgageTerm);
-                        editor.putInt(SP_KEY_MORTGAGE_TERM, mortgageTerm);
+                        m_sharedAppData.putInt(SP_KEY_MORTGAGE_TERM, mortgageTerm);
                         break;
                 }
 
-                editor.commit();
                 refreshUI();
                 ignoreRefreshInitLoan=false;
                 ignoreRefreshPrincipal=false;
