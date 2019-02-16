@@ -7,7 +7,7 @@ import java.util.Date;
  * A helper class for calculating mortgage information.
  */
 public class MortgageCalc {
-    public static final int MONTHS_IN_YEAR=12;
+    static final int MONTHS_IN_YEAR=12;
 
     // Private Members
     private double initLoan;
@@ -27,7 +27,7 @@ public class MortgageCalc {
      * @param loanPrincipal The current amount remaining on the loan
      * @param mortgageTermInYears What is the original term of the loan?  15, 30 years?
      */
-    public MortgageCalc(double initLoan, double loanPrincipal, int mortgageTermInYears, double interestRate) {
+    MortgageCalc(double initLoan, double loanPrincipal, int mortgageTermInYears, double interestRate) {
         this.initLoan = initLoan;
         this.loanPrincipal = loanPrincipal;
         this.mortgageTermInYears = mortgageTermInYears;
@@ -40,69 +40,59 @@ public class MortgageCalc {
         deriveCompletionDate();
     }
 
-    public double getInitLoan() {return initLoan;}
+    double getInitLoan() {return initLoan;}
 
-    public void setInitLoan(double initLoan) {
+    void setInitLoan(double initLoan) {
         this.initLoan = initLoan;
         deriveBaseMonthlyPayment();
         deriveCompletionInformation();
     }
 
-    public double getLoanPrincipal() {
+    double getLoanPrincipal() {
         return loanPrincipal;
     }
 
-    public void setLoanPrincipal(double loanPrincipal) {
+    void setLoanPrincipal(double loanPrincipal) {
         this.loanPrincipal = loanPrincipal;
         deriveCompletionInformation();
     }
 
-    public double getInterestRate() {
+    double getInterestRate() {
         return interestRate;
     }
 
-    public void setInterestRate(double interestRate) {
+    void setInterestRate(double interestRate) {
         this.interestRate = interestRate;
         deriveBaseMonthlyPayment();
         deriveCompletionInformation();
     }
 
-    public Date getCompletionDate() {
+    Date getCompletionDate() {
         return completionDate;
     }
 
-    public int getMortgageTermInYears() {
+    int getMortgageTermInYears() {
 
         return mortgageTermInYears;
     }
 
-    public void setMortgageTermInYears(int mortgageTermInYears) {
+    void setMortgageTermInYears(int mortgageTermInYears) {
         this.mortgageTermInYears = mortgageTermInYears;
         deriveBaseMonthlyPayment();
         deriveCompletionInformation();
     }
 
-    public double getBaseMonthlyPayment() {
+    double getBaseMonthlyPayment() {
         return baseMonthlyPayment;
     }
 
-    // users can no longer set this.
-//    public void setBaseMonthlyPayment(double baseMonthlyPayment) {
-//        this.baseMonthlyPayment = baseMonthlyPayment;
-//        deriveCompletionInformation();
-//    }
-
-    public double getAddlMonthlyPayment() {
+    double getAddlMonthlyPayment() {
         return addlMonthlyPayment;
     }
 
-    public void setAddlMonthlyPayment(double addlMonthlyPayment) {
+    void setAddlMonthlyPayment(double addlMonthlyPayment) {
         this.addlMonthlyPayment = addlMonthlyPayment;
         deriveCompletionInformation();
-    }
-
-    public int getNumPaymentsRemaining() {
-        return numPaymentsRemaining;
     }
 
     private void deriveCompletionInformation() {
@@ -143,8 +133,7 @@ public class MortgageCalc {
     }
 
     private double getMonthlyInterestRate() {
-        double monthlyInterestRate = interestRate/MONTHS_IN_YEAR; // i, the monthly interest rate.
-        return monthlyInterestRate;
+        return interestRate/MONTHS_IN_YEAR;
     }
 
     private void deriveCompletionDate() {

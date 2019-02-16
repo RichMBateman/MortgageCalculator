@@ -1,17 +1,22 @@
 package com.bateman.rich.mortgagecalculator;
 
+import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
+import com.bateman.rich.rmblibrary.gui.AboutAppDialog;
 import com.bateman.rich.rmblibrary.persistence.SharedAppData;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,14 +49,12 @@ public class MainActivity extends AppCompatActivity {
     private MortgageCalc mortgageCalc;
 
     private final SharedAppData m_sharedAppData = new SharedAppData();
+
+    // Menu
+    private static final int MENU_ID_ABOUT = 1001;
     
     // Widgets
-    private TextView labelLoanPrincipal;
-    private TextView labelMortgageTerm;
-    private TextView labelInterestRate;
     private TextView labelMonthlyPayment;
-    private TextView labelAddlMonthlyPayment;
-    private TextView labelYourResultDescription;
     private TextView labelActualTargetMonthResult;
     private EditText inputInitLoan;
     private EditText inputLoanPrincipal;
@@ -77,6 +80,35 @@ public class MainActivity extends AppCompatActivity {
         initializeMortgageCalc();
         refreshUI();
         Log.d(TAG, "onCreate: end");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, MENU_ID_ABOUT, Menu.NONE, "About");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int menuId = item.getItemId();
+        switch(menuId) {
+            case MENU_ID_ABOUT:
+                handleMenuShowAboutDialog();
+                break;
+            default:
+                throw new IllegalStateException("Unknown menu item clicked.");
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void handleMenuShowAboutDialog() {
+        AboutAppDialog aboutDialog = new AboutAppDialog(this);
+        aboutDialog.setIconId(R.mipmap.ic_launcher)
+                .setTitleId(R.string.app_name)
+                .setVersionName(BuildConfig.VERSION_NAME)
+                .setCopyrightYear(2019)
+                .show();
     }
 
     @Override
@@ -142,18 +174,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void findWidgets() {
-        labelLoanPrincipal = findViewById(R.id.labelEnterLoanPrincipal);
-        labelMortgageTerm = findViewById(R.id.labelEnterMortgageTerm);
-        labelInterestRate = findViewById(R.id.labelInterestRate);
         labelMonthlyPayment = findViewById(R.id.labelBaseMonthlyPayment);
-        labelAddlMonthlyPayment = findViewById(R.id.labelAdditionalMonthlyPayment);
-        labelYourResultDescription = findViewById(R.id.labelYourResult);
         labelActualTargetMonthResult = findViewById(R.id.labelResult);
         inputInitLoan = findViewById((R.id.inputInitLoanAmount));
         inputLoanPrincipal = findViewById(R.id.inputLoanPrincipal);
         inputMortgageTerm = findViewById(R.id.inputMortgageTermInYears);
         inputInterestRate = findViewById(R.id.inputMortgageInterestRate);
-        //inputMonthlyPayment = findViewById(R.id.inputMonthlyPayment);
         inputAddlMonthlyPayment = findViewById(R.id.inputAdditionalPayment);
     }
 
@@ -161,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         inputInitLoan.addTextChangedListener(new GenericTextWatcher(inputInitLoan));
         inputLoanPrincipal.addTextChangedListener(new GenericTextWatcher(inputLoanPrincipal));
         inputAddlMonthlyPayment.addTextChangedListener(new GenericTextWatcher(inputAddlMonthlyPayment));
-       // inputMonthlyPayment.addTextChangedListener(new GenericTextWatcher(inputMonthlyPayment));
         inputMortgageTerm.addTextChangedListener(new GenericTextWatcher(inputMortgageTerm));
         inputInterestRate.addTextChangedListener(new GenericTextWatcher(inputInterestRate));
     }
@@ -178,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
         inputInitLoan.setOnFocusChangeListener(l);
         inputLoanPrincipal.setOnFocusChangeListener(l);
         inputAddlMonthlyPayment.setOnFocusChangeListener(l);
-        //inputMonthlyPayment.setOnFocusChangeListener(l);
         inputMortgageTerm.setOnFocusChangeListener(l);
         inputInterestRate.setOnFocusChangeListener(l);
     }
@@ -187,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
         mortgageCalc = new MortgageCalc(DEFAULT_INIT_LOAN, DEFAULT_PRINCIPAL, DEFAULT_TERM, DEFAULT_RATE);
     }
 
+    @SuppressLint("DefaultLocale")
     private void refreshUI() {
         ignoreEvents = true;
 
@@ -219,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Date targetDate = mortgageCalc.getCompletionDate();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM, yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
         labelActualTargetMonthResult.setText(dateFormat.format(targetDate));
         ignoreEvents=false;
     }
